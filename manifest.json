@@ -1,0 +1,9 @@
+{
+  "name": "Mr Visiter",
+  "short_name": "MrVisiter",
+  "description": "Mr Visiter - السياحة في الشمال",
+  "start_url": "/mr-visiter/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000"
+}
