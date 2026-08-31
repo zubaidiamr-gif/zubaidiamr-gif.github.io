@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr Visiter - نظام الزوار</title>
+<style>
+body{font-family:system-ui;background:#f6f7fb;margin:0;padding:0}
+header{background:#111;color:#fff;padding:20px;text-align:center}
+.container{max-width:900px;margin:30px auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.07)}
+h1{margin:0} .btn{background:#111;color:#fff;padding:12px 20px;border:0;border-radius:10px;cursor:pointer}
+input,select{width:100%;padding:12px;margin:8px 0 16px 0;border:1px solid #ddd;border-radius:10px}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{padding:12px;border-bottom:1px solid #eee;text-align:right}
+</style>
+</head>
+<body>
+<header><h1>Mr. Visiter 👤</h1><p>نظام تسجيل الزوار الذكي</p></header>
+<div class="container">
+<h3>تسجيل زائر جديد</h3>
+<input id="name" placeholder="اسم الزائر">
+<input id="phone" placeholder="رقم الهاتف">
+<select id="reason"><option>زيارة</option><option>اجتماع</option><option>صيانة</option></select>
+<button class="btn" onclick="addVisitor()">إضافة زائر</button>
+<table id="table"><tr><th>الاسم</th><th>الهاتف</th><th>السبب</th><th>الوقت</th></tr></table>
+</div>
+<script>
+function addVisitor(){
+ let n=document.getElementById('name').value;
+ let p=document.getElementById('phone').value;
+ let r=document.getElementById('reason').value;
+ if(!n)return alert('اكتبي الاسم');
+ let time=new Date().toLocaleTimeString();
+ document.getElementById('table').innerHTML+=<tr><td>${n}</td><td>${p}</td><td>${r}</td><td>${time}</td></tr>;
+ document.getElementById('name').value='';document.getElementById('phone').value='';
+}
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr Visiter - نظام الزوار</title>
+<style>
+body{font-family:system-ui;background:#f6f7fb;margin:0;padding:0}
+header{background:#111;color:#fff;padding:20px;text-align:center}
+.container{max-width:900px;margin:30px auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.07)}
+h1{margin:0} .btn{background:#111;color:#fff;padding:12px 20px;border:0;border-radius:10px;cursor:pointer}
+input,select{width:100%;padding:12px;margin:8px 0 16px 0;border:1px solid #ddd;border-radius:10px}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{padding:12px;border-bottom:1px solid #eee;text-align:right}
+</style>
+</head>
+<body>
+<header><h1>Mr. Visiter 👤</h1><p>نظام تسجيل الزوار الذكي</p></header>
+<div class="container">
+<h3>تسجيل زائر جديد</h3>
+<input id="name" placeholder="اسم الزائر">
+<input id="phone" placeholder="رقم الهاتف">
+<select id="reason"><option>زيارة</option><option>اجتماع</option><option>صيانة</option></select>
+<button class="btn" onclick="addVisitor()">إضافة زائر</button>
+<table id="table"><tr><th>الاسم</th><th>الهاتف</th><th>السبب</th><th>الوقت</th></tr></table>
+</div>
+<script>
+function addVisitor(){
+ let n=document.getElementById('name').value;
+ let p=document.getElementById('phone').value;
+ let r=document.getElementById('reason').value;
+ if(!n)return alert('اكتبي الاسم');
+ let time=new Date().toLocaleTimeString();
+ document.getElementById('table').innerHTML+=<tr><td>${n}</td><td>${p}</td><td>${r}</td><td>${time}</td></tr>;
+ document.getElementById('name').value='';document.getElementById('phone').value='';
+}
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr Visiter - نظام الزوار</title>
+<style>
+body{font-family:system-ui;background:#f6f7fb;margin:0;padding:0}
+header{background:#111;color:#fff;padding:20px;text-align:center}
+.container{max-width:900px;margin:30px auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.07)}
+h1{margin:0} .btn{background:#111;color:#fff;padding:12px 20px;border:0;border-radius:10px;cursor:pointer}
+input,select{width:100%;padding:12px;margin:8px 0 16px 0;border:1px solid #ddd;border-radius:10px}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{padding:12px;border-bottom:1px solid #eee;text-align:right}
+</style>
+</head>
+<body>
+<header><h1>Mr. Visiter 👤</h1><p>نظام تسجيل الزوار الذكي</p></header>
+<div class="container">
+<h3>تسجيل زائر جديد</h3>
+<input id="name" placeholder="اسم الزائر">
+<input id="phone" placeholder="رقم الهاتف">
+<select id="reason"><option>زيارة</option><option>اجتماع</option><option>صيانة</option></select>
+<button class="btn" onclick="addVisitor()">إضافة زائر</button>
+<table id="table"><tr><th>الاسم</th><th>الهاتف</th><th>السبب</th><th>الوقت</th></tr></table>
+</div>
+<script>
+function addVisitor(){
+ let n=document.getElementById('name').value;
+ let p=document.getElementById('phone').value;
+ let r=document.getElementById('reason').value;
+ if(!n)return alert('اكتبي الاسم');
+ let time=new Date().toLocaleTimeString();
+ document.getElementById('table').innerHTML+=<tr><td>${n}</td><td>${p}</td><td>${r}</td><td>${time}</td></tr>;
+ document.getElementById('name').value='';document.getElementById('phone').value='';
+}
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr Visiter - نظام الزوار</title>
+<style>
+body{font-family:system-ui;background:#f6f7fb;margin:0;padding:0}
+header{background:#111;color:#fff;padding:20px;text-align:center}
+.container{max-width:900px;margin:30px auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.07)}
+h1{margin:0} .btn{background:#111;color:#fff;padding:12px 20px;border:0;border-radius:10px;cursor:pointer}
+input,select{width:100%;padding:12px;margin:8px 0 16px 0;border:1px solid #ddd;border-radius:10px}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{padding:12px;border-bottom:1px solid #eee;text-align:right}
+</style>
+</head>
+<body>
+<header><h1>Mr. Visiter 👤</h1><p>نظام تسجيل الزوار الذكي</p></header>
+<div class="container">
+<h3>تسجيل زائر جديد</h3>
+<input id="name" placeholder="اسم الزائر">
+<input id="phone" placeholder="رقم الهاتف">
+<select id="reason"><option>زيارة</option><option>اجتماع</option><option>صيانة</option></select>
+<button class="btn" onclick="addVisitor()">إضافة زائر</button>
+<table id="table"><tr><th>الاسم</th><th>الهاتف</th><th>السبب</th><th>الوقت</th></tr></table>
+</div>
+<script>
+function addVisitor(){
+ let n=document.getElementById('name').value;
+ let p=document.getElementById('phone').value;
+ let r=document.getElementById('reason').value;
+ if(!n)return alert('اكتبي الاسم');
+ let time=new Date().toLocaleTimeString();
+ document.getElementById('table').innerHTML+=<tr><td>${n}</td><td>${p}</td><td>${r}</td><td>${time}</td></tr>;
+ document.getElementById('name').value='';document.getElementById('phone').value='';
+}
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr Visiter - نظام الزوار</title>
+<style>
+body{font-family:system-ui;background:#f6f7fb;margin:0;padding:0}
+header{background:#111;color:#fff;padding:20px;text-align:center}
+.container{max-width:900px;margin:30px auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.07)}
+h1{margin:0} .btn{background:#111;color:#fff;padding:12px 20px;border:0;border-radius:10px;cursor:pointer}
+input,select{width:100%;padding:12px;margin:8px 0 16px 0;border:1px solid #ddd;border-radius:10px}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{padding:12px;border-bottom:1px solid #eee;text-align:right}
+</style>
+</head>
+<body>
+<header><h1>Mr. Visiter 👤</h1><p>نظام تسجيل الزوار الذكي</p></header>
+<div class="container">
+<h3>تسجيل زائر جديد</h3>
+<input id="name" placeholder="اسم الزائر">
+<input id="phone" placeholder="رقم الهاتف">
+<select id="reason"><option>زيارة</option><option>اجتماع</option><option>صيانة</option></select>
+<button class="btn" onclick="addVisitor()">إضافة زائر</button>
+<table id="table"><tr><th>الاسم</th><th>الهاتف</th><th>السبب</th><th>الوقت</th></tr></table>
+</div>
+<script>
+function addVisitor(){
+ let n=document.getElementById('name').value;
+ let p=document.getElementById('phone').value;
+ let r=document.getElementById('reason').value;
+ if(!n)return alert('اكتبي الاسم');
+ let time=new Date().toLocaleTimeString();
+ document.getElementById('table').innerHTML+=<tr><td>${n}</td><td>${p}</td><td>${r}</td><td>${time}</td></tr>;
+ document.getElementById('name').value='';document.getElementById('phone').value='';
+}
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mr Visiter - نظام الزوار</title>
+<style>
+body{font-family:system-ui;background:#f6f7fb;margin:0;padding:0}
+header{background:#111;color:#fff;padding:20px;text-align:center}
+.container{max-width:900px;margin:30px auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.07)}
+h1{margin:0} .btn{background:#111;color:#fff;padding:12px 20px;border:0;border-radius:10px;cursor:pointer}
+input,select{width:100%;padding:12px;margin:8px 0 16px 0;border:1px solid #ddd;border-radius:10px}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{padding:12px;border-bottom:1px solid #eee;text-align:right}
+</style>
+</head>
+<body>
+<header><h1>Mr. Visiter 👤</h1><p>نظام تسجيل الزوار الذكي</p></header>
+<div class="container">
+<h3>تسجيل زائر جديد</h3>
+<input id="name" placeholder="اسم الزائر">
+<input id="phone" placeholder="رقم الهاتف">
+<select id="reason"><option>زيارة</option><option>اجتماع</option><option>صيانة</option></select>
+<button class="btn" onclick="addVisitor()">إضافة زائر</button>
+<table id="table"><tr><th>الاسم</th><th>الهاتف</th><th>السبب</th><th>الوقت</th></tr></table>
+</div>
+<script>
+function addVisitor(){
+ let n=document.getElementById('name').value;
+ let p=document.getElementById('phone').value;
+ let r=document.getElementById('reason').value;
+ if(!n)return alert('اكتبي الاسم');
+ let time=new Date().toLocaleTimeString();
+ document.getElementById('table').innerHTML+=<tr><td>${n}</td><td>${p}</td><td>${r}</td><td>${time}</td></tr>;
+ document.getElementById('name').value='';document.getElementById('phone').value='';
+}
+</script>
+</body>
+</html>
