@@ -236,17 +236,15 @@ function addVisitor(){
       const onIncomplete = (p) => { console.log(p); };
       await Pi.authenticate(scopes, onIncomplete);
       await Pi.createPayment({
-        amount: 0.01,
-        memo: "Test for Mr Visiter",
-        metadata: { app: "mrvisiter" }
-      }, {
-        onReadyForServerApproval: (id) => { alert("تم! ID: "+id+" - ارجعي لصفحة Pi واكبسي Verify"); },
-        onReadyForServerCompletion: (id, txid) => { alert("تم الدفع بنجاح!"); },
-        onCancel: () => alert("الغيت"),
-        onError: (e) => alert("خطأ: "+e)
-      });
-    } catch(err){ alert(err.message); }
-  }
+        amount: 0.01,
+        memo: "Test for Mr Visiter",
+        metadata: { app: "mrvisiter" }
+      }, {
+        onReadyForServerApproval: (id) => { Pi.ApprovePayment(id); },
+        onReadyForServerCompletion: (id, txid) => { Pi.CompletePayment(id, txid); alert("تم الدفع بنجاح! ID: "+id); },
+        onCancel: () => alert("الغيت"),
+        onError: (e) => alert("خطأ: "+e)
+      });
 </script>
 <button onclick="payWithPi()" style="background:#8a2be2;color:white;padding:15px 30px;border:none;border-radius:12px;font-size:18px;margin:20px auto;display:block;">
   ادفع 0.01 Pi لتفعيل التطبيق 💜
