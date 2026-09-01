@@ -7,11 +7,11 @@
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 <script> Pi.init({ version: "2.0", sandbox: false }); </script>
 <style>
-body{font-family:Tahoma;text-align:center;padding:40px;background:#f9f9f9}
+body{font-family:Tahoma;text-align:center;padding:30px;background:#f9f9f9}
 .box{background:white;padding:30px;border-radius:15px;max-width:400px;margin:auto;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
-button{background:#6a1b9a;color:white;border:none;padding:15px 30px;font-size:18px;border-radius:10px;width:100%;cursor:pointer}
+button{background:#6a1b9a;color:white;border:none;padding:15px 30px;font-size:18px;border-radius:10px;width:100%;cursor:pointer;margin-top:10px}
 button:active{transform:scale(0.97)}
-#status{margin-top:15px;color:#555}
+#status{margin-top:15px;color:#555;font-size:14px}
 </style>
 </head>
 <body>
@@ -19,16 +19,25 @@ button:active{transform:scale(0.97)}
 <h2>منصة التعليم</h2>
 <p>تفعيل الحساب - 0.01 Pi</p>
 <button onclick="pay()">ادفع 0.01 Pi</button>
-<div id="status"></div>
+<div id="status">افتحي من Pi Browser</div>
 </div>
 
 <script>
+// هاي الدالة عشان تمسح الدفعات العالقة اللي كانت تطلعلك Pending Payment
+function onIncompletePaymentFound(payment) {
+  console.log("وجدت دفعة عالقة:", payment);
+  document.getElementById('status').innerText = "جاري تنظيف دفعة عالقة...";
+  return Pi.completePayment(payment.identifier);
+}
+
 async function pay(){
   const status = document.getElementById('status');
   try{
     status.innerText = "جاري تسجيل الدخول...";
-    const auth = await Pi.authenticate(['payments'], (p)=>{});
-    status.innerText = "جاري فتح الدفع...";
+    const auth = await Pi.authenticate(['payments'], onIncompletePaymentFound);
+    
+    status.innerText = "أهلا " + auth.user.username + " - جاري فتح الدفع...";
+    
     await Pi.createPayment({
       amount: 0.01,
       memo: "تفعيل حساب منصة التعليم",
@@ -36,11 +45,9 @@ async function pay(){
     }, {
       onReadyForServerApproval: function(paymentId){
         status.innerText = "بانتظار الموافقة... " + paymentId;
-        // هون لازم السيرفر يوافق - حاليا بنوافق تلقائيا للتجربة
-        fetch('/approve', {method:'POST'}).catch(()=>{});
       },
       onReadyForServerCompletion: function(paymentId, txid){
-        status.innerText = "تم الدفع بنجاح! Tx: " + txid;
+        status.innerText = "✅ تم الدفع بنجاح! Tx: " + txid;
       },
       onCancel: function(paymentId){
         status.innerText = "تم إلغاء الدفع";
@@ -50,7 +57,7 @@ async function pay(){
       }
     });
   }catch(e){
-    status.innerText = "خطأ: " + e.message + " (افتحي من Pi Browser)";
+    status.innerText = "خطأ: " + e.message;
   }
 }
 </script>
