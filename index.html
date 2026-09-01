@@ -20,15 +20,18 @@ button{background:#6a1b9a;color:white;border:none;padding:15px 30px;font-size:18
 <button onclick="pay()">ادفع 0.01 Pi</button>
 <div id="status">افتحي من Pi Browser</div>
 </div>
-<script>
-const PI_API_KEY = 
 
-function onIncompletePaymentFound(p){
+<script>
+// بكرا بس بتحطي هون رابط السيرفر اللي رح نعمله
+const BACKEND = "https://YOUR-BACKEND-URL.replit.dev";
+
+function onIncompletePaymentFound(payment){
   document.getElementById('status').innerText = "جاري مسح دفعة عالقة...";
-  return fetch(`https://api.minepi.com/v2/payments/${p.identifier}/cancel`, {
-    method: 'POST',
-    headers: { 'Authorization': `Key ${PI_API_KEY}` }
-  });
+  return fetch(BACKEND + "/cancel", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({paymentId: payment.identifier})
+  }).then(()=>{}).catch(()=>{});
 }
 
 async function pay(){
@@ -39,21 +42,22 @@ async function pay(){
     await Pi.createPayment({
       amount: 0.01,
       memo: "تفعيل حساب",
-      metadata: {type: "activation"}
+      metadata: {type:"activation"}
     }, {
       onReadyForServerApproval: (id) => {
         status.innerText = "جاري الموافقة...";
-        fetch(`https://api.minepi.com/v2/payments/${id}/approve`, {
-          method: 'POST',
-          headers: { 'Authorization': `Key ${PI_API_KEY}` }
+        fetch(BACKEND + "/approve", {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({paymentId: id})
         });
       },
       onReadyForServerCompletion: (id, txid) => {
         status.innerText = "✅ تم الدفع " + txid;
-        fetch(`https://api.minepi.com/v2/payments/${id}/complete`, {
-          method: 'POST',
-          headers: { 'Authorization': `Key ${PI_API_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({txid: txid})
+        fetch(BACKEND + "/complete", {
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body: JSON.stringify({paymentId: id, txid: txid})
         });
       },
       onCancel: () => status.innerText = "تم الإلغاء",
