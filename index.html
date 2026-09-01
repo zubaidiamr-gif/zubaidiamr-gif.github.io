@@ -6,20 +6,37 @@
 <title>منصة التعليم</title>
 <script src="https://sdk.minepi.io/pi-sdk.js"></script>
 </head>
-<body style="text-align:center;padding:40px">
-<h2>منصة التعليم - تفعيل الحساب</h2>
-<button onclick="pay()" style="padding:15px 30px;background:#7b33ff;color:white;border:0;border-radius:10px;font-size:18px">ادفع 0.01 Pi للتفعيل</button>
+<body style="text-align:center;padding:40px;font-family:sans-serif">
+<h2>منصة التعليم</h2>
+<p id="status">جاري التحميل...</p>
+<button id="btn" onclick="pay()" style="display:none;padding:15px 30px;background:#7b33ff;color:white;border:0;border-radius:10px;font-size:18px">ادفع 0.01 Pi للتفعيل</button>
+
 <script>
 Pi.init({version:"2.0",sandbox:false});
+let user=null;
+
+async function init(){
+  try{
+    const scopes = ['payments','username'];
+    const auth = await Pi.authenticate(scopes, (p)=>{});
+    user = auth.user;
+    document.getElementById("status").innerText = "أهلا " + user.username + " - جاهز للدفع";
+    document.getElementById("btn").style.display="inline-block";
+  }catch(e){
+    document.getElementById("status").innerText = "افتحي الموقع من داخل Pi Browser";
+  }
+}
+init();
+
 async function pay(){
  try{
-  await Pi.createPayment({amount:0.01,memo:"تفعيل الحساب",metadata:{type:"activation"}},{
-   onReadyForServerApproval:(id)=>{console.log(id)},
-   onReadyForServerCompletion:(id,txid)=>{alert("✅ تم الدفع بنجاح");},
+  await Pi.createPayment({amount:0.01,memo:"تفعيل حساب منصة التعليم",metadata:{type:"activation"}},{
+   onReadyForServerApproval:(id)=>{alert("جاهز للموافقة: "+id)},
+   onReadyForServerCompletion:(id,txid)=>{alert("✅ تم الدفع بنجاح: "+txid)},
    onCancel:()=>alert("تم الإلغاء"),
-   onError:(e)=>alert(e.message)
+   onError:(e)=>alert("خطأ: "+e.message)
   });
- }catch(e){console.log(e)}
+ }catch(e){alert(e.message)}
 }
 </script>
 </body>
