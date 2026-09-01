@@ -16,14 +16,14 @@ async function pay() {
         try {
           await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
             method: "POST",
-            headers: { "Authorization": "Key k281fv12y83vntcjipwkiguvao97ms5hkfspprej5wubnoxuk30grx3eyx6idqwr }
+            headers: { "Authorization": "Key p1lohmjb4ilnky958bt4vheimfbzqmtbpwp1giix7git4trogdceh0q2nxstqcfc
           });
         } catch(e) { console.log("تخطي الموافقة - الدفع ناجح"); }
       },
       onReadyForServerCompletion: (paymentId, txid) => {
         console.log("مكتمل", paymentId, txid);
         alert("✅ تمت عملية الدفع بنجاح! تم تفعيل حسابك");
-        // هون بتحطي كود التفعيل تبعك
+        // p1lohmjb4ilnky958bt4vheimfbzqmtbpwp1giix7git4trogdceh0q2nxstqcfc
         localStorage.setItem("paid", "true");
         window.location.href = "/dashboard.html";
       },
