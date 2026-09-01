@@ -1,45 +1,43 @@
 <script src="https://sdk.minepi.io/pi-sdk.js"></script>
 <script>
-const Pi = window.Pi;
-Pi.init({ version: "2.0", sandbox: false });
+  const Pi = window.Pi;
+  Pi.init({ version: "2.0", sandbox: false });
 
-async function pay() {
-  try {
-    const payment = await Pi.createPayment({
-      amount: 0.01,
-      memo: "تفعيل الحساب - منصة التعليم",
-      metadata: { type: "activation" }
-    }, {
-      onReadyForServerApproval: async (paymentId) => {
-        console.log("جاهز للموافقة", paymentId);
-        // بنحاول نأكد، لو فشل بنعتبره ناجح
-        try {
-          await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
+  async function pay() {
+    try {
+      const payment = await Pi.createPayment({
+        amount: 0.01,
+        memo: "تفعيل الحساب - منصة التعليم",
+        metadata: { type: "activation" }
+      }, {
+        onReadyForServerApproval: function(paymentId) {
+          console.log("جاهز للموافقة", paymentId);
+          // هون لازم السيرفر يوافق
+          // مثال: fetch('/approve', {method:'POST', body: JSON.stringify({paymentId})})
+          // للتجربة على GitHub بنعمل موافقة وهمية مؤقتة
+          fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
             method: "POST",
-            headers: { "Authorization": "Key p1lohmjb4ilnky958bt4vheimfbzqmtbpwp1giix7git4trogdceh0q2nxstqcfc
+            headers: { "Authorization": "Key YOUR_API_KEY_HERE" }
           });
-        } catch(e) { console.log("تخطي الموافقة - الدفع ناجح"); }
-      },
-      onReadyForServerCompletion: (paymentId, txid) => {
-        console.log("مكتمل", paymentId, txid);
-        alert("✅ تمت عملية الدفع بنجاح! تم تفعيل حسابك");
-        // p1lohmjb4ilnky958bt4vheimfbzqmtbpwp1giix7git4trogdceh0q2nxstqcfc
-        localStorage.setItem("paid", "true");
-        window.location.href = "/dashboard.html";
-      },
-      onCancel: (paymentId) => { alert("تم إلغاء الدفع"); },
-      onError: (error, payment) => { 
-        // حتى لو طلع خطأ تأكيد المطور، بنعتبره ناجح لأنه الدفع تم
-        if(error.message.includes("developer")) {
+        },
+        onReadyForServerCompletion: function(paymentId, txid) {
+          console.log("مكتمل", paymentId, txid);
           alert("✅ تمت عملية الدفع بنجاح! تم تفعيل حسابك");
           localStorage.setItem("paid", "true");
-        } else {
-          alert("خطأ: " + error.message);
+          window.location.href = "/dashboard.html";
+        },
+        onCancel: function(paymentId) {
+          alert("تم إلغاء الدفع");
+        },
+        onError: function(error, payment) {
+          console.error(error);
+          alert("خطأ في الدفع: " + error.message);
         }
-      }
-    });
-  } catch(err) { console.error(err); }
-}
+      });
+    } catch(err) {
+      console.error(err);
+    }
+  }
 </script>
+
 <button onclick="pay()">ادفع 0.01 Pi للتفعيل</button>
-قصدك هاد الكود الثقه بجيثب
