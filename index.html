@@ -1,30 +1,57 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>منصة</title>
-<script src="https://sdk.minepi.io/pi-sdk.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منصة التعليم</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script> Pi.init({ version: "2.0", sandbox: false }); </script>
 <style>
-* { box-sizing:border-box; }
-body { margin:0; padding:20px; width:100%; overflow-x:hidden; text-align:center; font-family:Arial; background:#fff; }
-h2 { font-size:22px; word-wrap:break-word; }
-button { width:90%; max-width:300px; padding:18px; background:#7b33ff; color:#fff; border:0; border-radius:15px; font-size:20px; }
+body{font-family:Tahoma;text-align:center;padding:40px;background:#f9f9f9}
+.box{background:white;padding:30px;border-radius:15px;max-width:400px;margin:auto;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
+button{background:#6a1b9a;color:white;border:none;padding:15px 30px;font-size:18px;border-radius:10px;width:100%;cursor:pointer}
+button:active{transform:scale(0.97)}
+#status{margin-top:15px;color:#555}
 </style>
 </head>
 <body>
+<div class="box">
 <h2>منصة التعليم</h2>
-<p>تفعيل الحساب</p>
+<p>تفعيل الحساب - 0.01 Pi</p>
 <button onclick="pay()">ادفع 0.01 Pi</button>
+<div id="status"></div>
+</div>
+
 <script>
-Pi.init({version:"2.0",sandbox:true});
-function pay(){
- Pi.createPayment({amount:0.01,memo:"تفعيل",metadata:{x:1}},{
-  onReadyForServerApproval:id=>alert("ID:"+id),
-  onReadyForServerCompletion:(a,b)=>alert("تم الدفع"),
-  onCancel:()=>alert("الغاء"),
-  onError:e=>alert(e.message)
- });
+async function pay(){
+  const status = document.getElementById('status');
+  try{
+    status.innerText = "جاري تسجيل الدخول...";
+    const auth = await Pi.authenticate(['payments'], (p)=>{});
+    status.innerText = "جاري فتح الدفع...";
+    await Pi.createPayment({
+      amount: 0.01,
+      memo: "تفعيل حساب منصة التعليم",
+      metadata: {type: "activation"}
+    }, {
+      onReadyForServerApproval: function(paymentId){
+        status.innerText = "بانتظار الموافقة... " + paymentId;
+        // هون لازم السيرفر يوافق - حاليا بنوافق تلقائيا للتجربة
+        fetch('/approve', {method:'POST'}).catch(()=>{});
+      },
+      onReadyForServerCompletion: function(paymentId, txid){
+        status.innerText = "تم الدفع بنجاح! Tx: " + txid;
+      },
+      onCancel: function(paymentId){
+        status.innerText = "تم إلغاء الدفع";
+      },
+      onError: function(error, payment){
+        status.innerText = "خطأ: " + error.message;
+      }
+    });
+  }catch(e){
+    status.innerText = "خطأ: " + e.message + " (افتحي من Pi Browser)";
+  }
 }
 </script>
 </body>
