@@ -16,8 +16,8 @@ async function pay() {
         try {
           await fetch(`https://api.minepi.com/v2/payments/${paymentId}/approve`, {
             method: "POST",
-            headers: { "Authorization": "Key ضعي_هنا_مفتاحك" }
-          });0ttuo5rezamjw6yb9qyy82guwbrmbhiybg9imwakulikdoubw11jpex8zo8o1rqs
+            headers: { "Authorization": "Key k281fv12y83vntcjipwkiguvao97ms5hkfspprej5wubnoxuk30grx3eyx6idqwr }
+          });
         } catch(e) { console.log("تخطي الموافقة - الدفع ناجح"); }
       },
       onReadyForServerCompletion: (paymentId, txid) => {
@@ -42,3 +42,4 @@ async function pay() {
 }
 </script>
 <button onclick="pay()">ادفع 0.01 Pi للتفعيل</button>
+قصدك هاد الكود الثقه بجيثب
