@@ -1,22 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Shop</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pi Payment Express</title>
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-<script>
-Pi.init({version:"2.0", sandbox:true});
-const BACKEND="https://3c3571f2-1201-4cc2-a296-342c1f12a4e5-00-h5df8mfkdfgt.sisko.replit.dev";
-function pay(){
-Pi.createPayment({amount:0.1,memo:"test",metadata:{}},
-{onReadyForServerApproval:function(id){fetch(BACKEND+"/api/pi/approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentId:id})})},
-onReadyForServerCompletion:function(id,txid){fetch(BACKEND+"/api/pi/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentId:id,txid:txid})}).then(()=>alert("تم الدفع"))},
-onIncompletePaymentFound:function(p){fetch(BACKEND+"/api/pi/cancel",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentId:p.identifier})}).then(()=>{alert("تم الغاء المعلق - اضغط مرة ثانية");location.reload()})}
-})}
-</script>
 </head>
-<body style="text-align:center;padding-top:100px;font-family:Arial">
-<h1>متجري</h1>
-<button onclick="pay()" style="padding:15px 30px;background:#6a3de8;color:white;border:none;border-radius:10px;font-size:20px">ادفع 0.1 Pi</button>
-</body>
-</html>
+<body style="font-family:Arial; text-align:center; padding:40px;">
+<h2>Pi Payment Express</h2>
+<button id="payBtn" style="padding:15px 30px; font-size:18px; background:#7a2de2; color:white; border:none; border-radius:10px;">Pay 1 Pi Test</button>
+<p id="status"></p>
+
+<script>
+// هذا هو رابطك الجديد - لا تغيريه
+const BACKEND = "https://3c3571f2-1201-4cc2-a296-342c1f12a4e5-00-h5df8mfkdfgt.sisko.replit.dev";
+
+Pi.init({ version: "2.0", sandbox: false });
+
+document.getElementById('payBtn').onclick = async () => {
+  document.getElementById('status').innerText = "جاري الاتصال...";
+  try {
+    const scopes = ['payments'];
+    const auth = await Pi.authenticate(scopes, (payment) => {
+        console.log("Incomplete payment found", payment);
+    });
+    
+    const payment = await Pi.createPayment({
+      amount: 1,
+      memo: "Test payment",
+      metadata: { test: "1" }
+    }, {
+      onReadyForServerApproval: async (paymentId) => {
+        document.getElementById('status').innerText = "Approving...";
+        await fetch(BACKEND + "/api/approve", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ paymentId: paymentId })
+       
