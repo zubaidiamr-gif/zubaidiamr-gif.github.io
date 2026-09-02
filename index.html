@@ -1,70 +1,55 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>منصة التعليم</title>
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-<script> Pi.init({ version: "2.0", sandbox: false }); </script>
-<style>
-body{font-family:Tahoma;text-align:center;padding:30px;background:#f9f9f9}
-.box{background:white;padding:30px;border-radius:15px;max-width:400px;margin:auto;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
-button{background:#6a1b9a;color:white;border:none;padding:15px 30px;font-size:18px;border-radius:10px;width:100%;cursor:pointer}
-#status{margin-top:15px;color:#555}
-</style>
-</head>
-<body>
-<div class="box">
-<h2>منصة التعليم</h2>
-<p>تفعيل الحساب - 0.01 Pi</p>
-<button onclick="pay()">ادفع 0.01 Pi</button>
-<div id="status">افتحي من Pi Browser</div>
-</div>
+const BACKEND_URL = "https://3c3571f2-1201-4cc2-a296-342c1f12a4e5-00-h5df8mfkdfgt.sisko.replit.dev";
 
-<script>
-// بكرا بس بتحطي هون رابط السيرفر اللي رح نعمله
-const BACKEND = "https://YOUR-BACKEND-URL.replit.dev";
+async function payWithPi(amount) {
+  const Pi = window.Pi;
+  await Pi.init({ version: "2.0" });
+  
+  const auth = await Pi.authenticate(['payments'], async (payment) => {
+    console.log("Found pending payment, canceling...", payment);
+    try {
+      await fetch(BACKEND_URL + "/api/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentId: payment.identifier })
+      });
+      alert("تم إلغاء الدفعة المعلقة القديمة، جرب ادفع مرة تانية");
+    } catch(e) {
+      console.error(e);
+    }
+  });
 
-function onIncompletePaymentFound(payment){
-  document.getElementById('status').innerText = "جاري مسح دفعة عالقة...";
-  return fetch(BACKEND + "/cancel", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({paymentId: payment.identifier})
-  }).then(()=>{}).catch(()=>{});
+  Pi.createPayment({
+    amount: amount,
+    memo: "Order payment",
+    metadata: { orderId: "order_" + Date.now() }
+  }, {
+    onReadyForServerApproval: async (paymentId) => {
+      console.log("Approving", paymentId);
+      await fetch(BACKEND_URL + "/api/approve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentId: paymentId })
+      });
+    },
+    onReadyForServerCompletion: async (paymentId, txid) => {
+      console.log("Completing", paymentId, txid);
+      await fetch(BACKEND_URL + "/api/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentId: paymentId, txid: txid })
+      });
+      alert("تم الدفع بنجاح!");
+    },
+    onCancel: async (paymentId) => {
+      await fetch(BACKEND_URL + "/api/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paymentId: paymentId })
+      });
+    },
+    onError: (error, payment) => {
+      console.error(error);
+      alert("خطأ في الدفع");
+    }
+  });
 }
-
-async function pay(){
-  const status = document.getElementById('status');
-  try{
-    const auth = await Pi.authenticate(['payments'], onIncompletePaymentFound);
-    status.innerText = "أهلا " + auth.user.username;
-    await Pi.createPayment({
-      amount: 0.01,
-      memo: "تفعيل حساب",
-      metadata: {type:"activation"}
-    }, {
-      onReadyForServerApproval: (id) => {
-        status.innerText = "جاري الموافقة...";
-        fetch(BACKEND + "/approve", {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({paymentId: id})
-        });
-      },
-      onReadyForServerCompletion: (id, txid) => {
-        status.innerText = "✅ تم الدفع " + txid;
-        fetch(BACKEND + "/complete", {
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body: JSON.stringify({paymentId: id, txid: txid})
-        });
-      },
-      onCancel: () => status.innerText = "تم الإلغاء",
-      onError: (e) => status.innerText = "خطأ: " + e.message
-    });
-  }catch(e){ status.innerText = "خطأ: " + e.message; }
-}
-</script>
-</body>
-</html>
