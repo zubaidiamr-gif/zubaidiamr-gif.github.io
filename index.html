@@ -1,55 +1,68 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>متجري - الدفع بـ Pi</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<style>
+body{font-family:sans-serif;text-align:center;padding:30px;background:#f8f8ff}
+.card{background:white;padding:20px;border-radius:15px;box-shadow:0 4px 15px #0001;max-width:400px;margin:auto}
+button{background:#6c4cff;color:white;border:none;padding:15px 30px;border-radius:10px;font-size:18px;cursor:pointer;width:100%;margin-top:10px}
+button:active{transform:scale(0.98)}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🛍️ متجري</h1>
+<p>ادفع بـ Pi Network</p>
+<h2>المنتج: هدية رقمية - 1 Pi</h2>
+<button onclick="payWithPi(1)">ادفع 1 Pi الآن</button>
+<button onclick="payWithPi(0.1)">جرب بـ 0.1 Pi</button>
+<p id="status"></p>
+</div>
+
+<script>
 const BACKEND_URL = "https://3c3571f2-1201-4cc2-a296-342c1f12a4e5-00-h5df8mfkdfgt.sisko.replit.dev";
 
-async function payWithPi(amount) {
+async function payWithPi(amount){
+ const status = document.getElementById("status");
+ try{
+  status.innerText="جاري التهيئة...";
   const Pi = window.Pi;
-  await Pi.init({ version: "2.0" });
-  
-  const auth = await Pi.authenticate(['payments'], async (payment) => {
-    console.log("Found pending payment, canceling...", payment);
-    try {
-      await fetch(BACKEND_URL + "/api/cancel", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentId: payment.identifier })
-      });
-      alert("تم إلغاء الدفعة المعلقة القديمة، جرب ادفع مرة تانية");
-    } catch(e) {
-      console.error(e);
-    }
+  await Pi.init({version:"2.0", sandbox:false});
+  const auth = await Pi.authenticate(['payments','username'], async (payment) => {
+     console.log("Found pending payment", payment);
+     status.innerText="إلغاء دفعة معلقة قديمة...";
+     try{
+       await fetch(BACKEND_URL+"/api/cancel",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentId: payment.identifier})});
+       alert("تم إلغاء الدفعة المعلقة، اضغط ادفع مرة ثانية");
+     }catch(e){ console.error(e); }
   });
 
-  Pi.createPayment({
-    amount: amount,
-    memo: "Order payment",
-    metadata: { orderId: "order_" + Date.now() }
-  }, {
-    onReadyForServerApproval: async (paymentId) => {
+  status.innerText="فتح نافذة الدفع...";
+  await Pi.createPayment({amount: amount, memo: "Order payment", metadata: {orderId: "order_"+Date.now()}}, {
+    onReadyForServerApproval: async (paymentId)=>{
+      status.innerText="الموافقة على الدفع...";
       console.log("Approving", paymentId);
-      await fetch(BACKEND_URL + "/api/approve", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentId: paymentId })
-      });
+      await fetch(BACKEND_URL+"/api/approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentId})});
     },
-    onReadyForServerCompletion: async (paymentId, txid) => {
+    onReadyForServerCompletion: async (paymentId, txid)=>{
+      status.innerText="إكمال الدفع...";
       console.log("Completing", paymentId, txid);
-      await fetch(BACKEND_URL + "/api/complete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentId: paymentId, txid: txid })
-      });
+      await fetch(BACKEND_URL+"/api/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentId, txid})});
+      status.innerText="✅ تم الدفع بنجاح! txid: "+txid;
       alert("تم الدفع بنجاح!");
     },
-    onCancel: async (paymentId) => {
-      await fetch(BACKEND_URL + "/api/cancel", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentId: paymentId })
-      });
-    },
-    onError: (error, payment) => {
-      console.error(error);
-      alert("خطأ في الدفع");
-    }
+    onCancel: (paymentId)=>{ status.innerText="تم الإلغاء"; console.log("cancel",paymentId); },
+    onError: (e, p)=>{ status.innerText="خطأ: "+e.message; console.error(e,p); }
   });
+
+ }catch(err){
+  status.innerText="خطأ: "+err.message;
+  console.error(err);
+ }
 }
+</script>
+</body>
+</html>
