@@ -10,30 +10,31 @@
 <h2>Pi Payment Express</h2>
 <button id="payBtn" style="padding:15px 30px; font-size:18px; background:#7a2de2; color:white; border:none; border-radius:10px;">Pay 1 Pi Test</button>
 <p id="status"></p>
-
 <script>
-// هذا هو رابطك الجديد - لا تغيريه
 const BACKEND = "https://3c3571f2-1201-4cc2-a296-342c1f12a4e5-00-h5df8mfkdfgt.sisko.replit.dev";
-
-Pi.init({ version: "2.0", sandbox: false });
-
-document.getElementById('payBtn').onclick = async () => {
+Pi.init({ version: "2.0", sandbox: false });document.getElementById('payBtn').onclick = async () => {
   document.getElementById('status').innerText = "جاري الاتصال...";
   try {
     const scopes = ['payments'];
-    const auth = await Pi.authenticate(scopes, (payment) => {
-        console.log("Incomplete payment found", payment);
-    });
-    
-    const payment = await Pi.createPayment({
-      amount: 1,
-      memo: "Test payment",
-      metadata: { test: "1" }
-    }, {
-      onReadyForServerApproval: async (paymentId) => {
+    await Pi.authenticate(scopes, (p) => console.log(p));
+    await Pi.createPayment({ amount: 1, memo: "Test payment", metadata: { test: "1" } }, {
+      onReadyForServerApproval: async (id) => {
         document.getElementById('status').innerText = "Approving...";
-        await fetch(BACKEND + "/api/approve", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ paymentId: paymentId })
-       
+        await fetch(BACKEND + "/api/approve", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ paymentId: id }) });
+      },
+      onReadyForServerCompletion: async (id, txid) => {
+        document.getElementById('status').innerText = "Completing...";
+        await fetch(BACKEND + "/api/complete", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ paymentId: id, txid: txid }) });
+        document.getElementById('status').innerText = "✅ تم الدفع بنجاح!";
+      },
+      onCancel: async (id) => {
+        await fetch(BACKEND + "/api/cancel", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ paymentId: id }) });
+        document.getElementById('status').innerText = "تم الالغاء";
+      },
+      onError: (e) => { document.getElementById('status').innerText = "Error: " + e; }
+    });
+  } catch (e) { document.getElementById('status').innerText = "Error: " + e.message; }
+};
+</script>
+</body>
+</html>
