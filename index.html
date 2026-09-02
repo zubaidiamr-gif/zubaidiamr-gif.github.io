@@ -1,46 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Pi Shop</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
 <script>
-// رابط السيرفر تاعك
+Pi.init({ version: "2.0", sandbox: true });
 const BACKEND = "https://3c3571f2-1201-4cc2-a296-342c1f12a4e5-00-h5df8mfkdfgt.sisko.replit.dev";
 
 function pay() {
   Pi.createPayment({
     amount: 0.1,
-    memo: "test payment",
-    metadata: {test: "1"}
+    memo: "test shop",
+    metadata: {shop: "test"}
   }, {
-    onReadyForServerApproval: function(paymentId) {
+    onReadyForServerApproval: function(id) {
       fetch(BACKEND + "/api/pi/approve", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({paymentId: paymentId})
+        body: JSON.stringify({paymentId: id})
       });
     },
-    onReadyForServerCompletion: function(paymentId, txid) {
+    onReadyForServerCompletion: function(id, txid) {
       fetch(BACKEND + "/api/pi/complete", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({paymentId: paymentId, txid: txid})
-      }).then(() => alert("تم الدفع بنجاح!"));
+        body: JSON.stringify({paymentId: id, txid: txid})
+      }).then(()=> alert("تم الدفع ✅"));
     },
-    onCancel: function(paymentId) {
+    onCancel: function(id) {
       fetch(BACKEND + "/api/pi/cancel", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({paymentId: paymentId})
+        body: JSON.stringify({paymentId: id})
       });
     },
-    onError: function(error) {
-      console.log(error);
-    },
     onIncompletePaymentFound: function(payment) {
-      // هون الحل النهائي للمشكلة
-      console.log("Found incomplete", payment);
       fetch(BACKEND + "/api/pi/cancel", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({paymentId: payment.identifier})
-      })
-      .then(() => {
+      }).then(()=> {
         alert("تم إلغاء الدفعة المعلقة، اضغط ادفع مرة ثانية");
         location.reload();
       });
@@ -48,3 +49,14 @@ function pay() {
   });
 }
 </script>
+<style>
+body{text-align:center; font-family:Arial; padding:50px}
+button{padding:15px 30px; background:#6a3de8; color:white; border:none; border-radius:10px; font-size:18px}
+</style>
+</head>
+<body>
+<h1>متجري</h1>
+<p>ادفع 0.1 Pi للتجربة</p>
+<button onclick="pay()">ادفع بـ Pi</button>
+</body>
+</html>
