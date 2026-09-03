@@ -1,23 +1,72 @@
-<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pi Pay</title><script src="https://sdk.minepi.com/pi-sdk.js"></script></head><body style="text-align:center;padding:50px;font-family:Arial"><h2>Pi Payment Fixed</h2><button id="btn" style="padding:15px 30px;background:#7a2de2;color:#fff;border:0;border-radius:12px;font-size:18px">ادفع 1 Pi</button><p id="s"></p><script>
-const BACKEND="https://3c3571f2-1201-4cc2-a296-342c1f12a4e5-00-h5df8mfkdfgt.sisko.replit.dev";
-Pi.init({version:"2.0"});
-const s=document.getElementById("s");
-document.getElementById("btn").onclick=async()=>{
- s.innerText="جاري تسجيل الدخول...";
- try{
-  await Pi.authenticate(["payments","username"],{
-   onIncompletePaymentFound:(p)=>{
-    s.innerText="بصلح دفعة معلقة...";
-    return fetch(BACKEND+"/api/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentId:p.identifier,txid:p.transaction?p.transaction.txid:""})});
-   }
-  });
-  s.innerText="تم الدخول، جاري الدفع...";
-  await Pi.createPayment({amount:1,memo:"test",metadata:{}},{
-   onReadyForServerApproval:(id)=>fetch(BACKEND+"/api/approve",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentId:id})}),
-   onReadyForServerCompletion:(id,txid)=>fetch(BACKEND+"/api/complete",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({paymentId:id,txid:txid})}).then(()=>s.innerText="✅ تم بنجاح!"),
-   onCancel:()=>s.innerText="الغيت",
-   onError:(e)=>s.innerText="Error "+e
-  });
- }catch(e){s.innerText=e.message}
-}
-</script></body></html>
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pi Payment</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script>
+  Pi.init({version:"2.0", sandbox:false});
+</script>
+<style>
+ body{font-family:Arial;text-align:center;padding:60px 20px}
+ button{padding:18px 35px;background:#7c3aed;color:#fff;border:0;border-radius:14px;font-size:20px}
+ #status{margin-top:20px;font-weight:bold}
+</style>
+</head>
+<body>
+<h1>Pi Payment Express</h1>
+<button id="payBtn">Pay 1 Pi Test</button>
+<div id="status">جاهز</div>
+
+<script>
+const BACKEND = "https://3c3571f2-1201-4cc2-a296-342c1f12a4e5-00-h5df8mfkdfgt.sisko.replit.dev";
+const statusEl = document.getElementById("status");
+
+document.getElementById("payBtn").onclick = async () => {
+  statusEl.innerText = "جاري تسجيل الدخول...";
+  try {
+    // هذا اهم سطر بيصلح الـ Pending
+    const auth = await Pi.authenticate(["payments","username"], {
+      onIncompletePaymentFound: (payment) => {
+        statusEl.innerText = "لقينا دفعة معلقة، بنصلحها...";
+        return fetch(BACKEND + "/api/complete", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction ? payment.transaction.txid : "" })
+        });
+      }
+    });
+
+    statusEl.innerText = "تم الدخول، جاري الدفع...";
+    
+    await Pi.createPayment({
+      amount: 1,
+      memo: "Test payment",
+      metadata: { test: "1" }
+    }, {
+      onReadyForServerApproval: (paymentId) => {
+        return fetch(BACKEND + "/api/approve", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ paymentId })
+        });
+      },
+      onReadyForServerCompletion: (paymentId, txid) => {
+        return fetch(BACKEND + "/api/complete", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ paymentId, txid })
+        }).then(()=> statusEl.innerText = "✅ تم الدفع بنجاح!");
+      },
+      onCancel: () => statusEl.innerText = "ألغيت العملية",
+      onError: (err) => statusEl.innerText = "Error: " + err
+    });
+
+  } catch(e) {
+    statusEl.innerText = "خطأ: " + e.message;
+  }
+};
+</script>
+</body>
+</html>
