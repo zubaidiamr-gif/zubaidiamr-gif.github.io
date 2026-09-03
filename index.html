@@ -1,4 +1,87 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pi Payment Express</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+</head>
+<body style="font-family:Arial; text-align:center; padding:40px;">
+<h2>Pi Payment Express</h2>
+<button id="payBtn" style="padding:15px 30px; font-size:18px; background:#7a2de2; color:white; border:none; border-radius:10px;">Pay 1 Pi Test</button>
+<p id="status"></p>
+
+<script>
+const BACKEND = "https://3c3571f2-1201-4cc2-a296-342c1f12a4e5-00-h5df8mfkdfgt.sisko.replit.dev";
+const statusEl = document.getElementById("status");
+
+// 1. تهيئة الـ SDK
+Pi.init({ version: "2.0", sandbox: false });
+
+async function authAndPay() {
+  statusEl.innerText = "جاري تسجيل الدخول...";
+  try {
+    // 2. هاد أهم جزء - بيمسح أي دفعة معلقة تلقائياً
+    const auth = await Pi.authenticate(["payments", "username"], {
+      onIncompletePaymentFound: function(payment) {
+        statusEl.innerText = "لقيت دفعة معلقة، عم بصلحها...";
+        console.log("Found incomplete:", payment.identifier);
+        // بنكملها على السيرفر
+        return fetch(BACKEND + "/api/complete", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction ? payment.transaction.txid : "" })
+        }).then(res => res.json()).then(() => {
+          statusEl.innerText = "تم تصليح الدفعة المعلقة، اضغط مرة ثانية";
+        });
+      }
+    });
+
+    statusEl.innerText = "أهلا " + auth.user.username + " - جاري إنشاء الدفع...";
+
+    // 3. إنشاء الدفع
+    await Pi.createPayment({
+      amount: 1,
+      memo: "Test payment 1 Pi",
+      metadata: { test: "1" }
+    }, {
+      onReadyForServerApproval: function(paymentId) {
+        statusEl.innerText = "جاري الموافقة...";
+        return fetch(BACKEND + "/api/approve", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ paymentId: paymentId })
+        });
+      },
+      onReadyForServerCompletion: function(paymentId, txid) {
+        statusEl.innerText = "جاري التأكيد...";
+        return fetch(BACKEND + "/api/complete", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ paymentId: paymentId, txid: txid })
+        }).then(() => {
+          statusEl.innerText = "✅ تم الدفع بنجاح! شكرا";
+        });
+      },
+      onCancel: function(paymentId) {
+        statusEl.innerText = "تم الإلغاء";
+      },
+      onError: function(error, payment) {
+        statusEl.innerText = "Error: " + error;
+        console.error(error);
+      }
+    });
+
+  } catch (e) {
+    statusEl.innerText = "Error: " + e.message;
+    console.error(e);
+  }
+}
+
+document.getElementById("payBtn").addEventListener("click", authAndPay);
+</script>
+</body>
+</html>
 <html>
 <head>
 <meta charset="utf-8">
