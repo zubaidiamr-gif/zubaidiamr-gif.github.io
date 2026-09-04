@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pay 1 Pi Test</title>
+<script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<style>
+body{font-family:sans-serif;background:#f5f0ff;text-align:center;padding:30px}
+.card{background:white;padding:25px;border-radius:20px;max-width:400px;margin:auto;box-shadow:0 5px 20px rgba(0,0,0,0.1)}
+button{background:#7c3aed;color:white;border:0;padding:15px 30px;border-radius:12px;font-size:18px;width:100%;cursor:pointer}
+#status{margin-top:15px;color:#555}
+</style>
+</head>
+<body>
+<div class="card">
+<h2>Pi Payment Express</h2>
+<p>جاهز ✅</p>
+<button onclick="pay()">Pay 1 Pi Test</button>
+<div id="status"></div>
+</div>
+<script>
+const BACKEND = "https://3c3571f2-1201-4cc2-a296-342c1f12a4e5-00-h5df8mfkdfgt.sisko.replit.dev";
+Pi.init({version:"2.0", sandbox:true});
+async function pay(){
+ document.getElementById('status').innerText="جاري فتح المحفظة...";
+ try{
+   const scopes = ['payments'];
+   const auth = await Pi.authenticate(scopes, (p)=>{});
+   Pi.createPayment({
+     amount:1,
+     memo:"Test Payment",
+     metadata:{test:"1"}
+   },{
+     onReadyForServerApproval: async (id)=>{
+       document.getElementById('status').innerText="جاري الموافقة...";
+       await fetch(BACKEND+'/api/approve', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({paymentId:id})});
+     },
+     onReadyForServerCompletion: async (id, txid)=>{
+       document.getElementById('status').innerText="جاري التاكيد...";
+       await fetch(BACKEND+'/api/complete', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({paymentId:id, txid:txid})});
+       document.getElementById('status').innerText="✅ تم الدفع بنجاح!";
+     },
+     onCancel: ()=>{document.getElementById('status').innerText="تم الالغاء";},
+     onError: (e)=>{document.getElementById('status').innerText="خطأ: "+e;}
+   });
+ }catch(e){document.getElementById('status').innerText=e.message}
+}
+</script>
+</body>
+</html>
