@@ -7,9 +7,9 @@
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 <script> Pi.init({version:"2.0", sandbox:false}); </script>
 <style>
- body{font-family:Arial;text-align:center;padding:60px 20px}
- button{padding:18px 35px;background:#7c3aed;color:#fff;border:0;border-radius:14px;font-size:20px}
- #status{margin-top:20px;font-weight:bold}
+ body{font-family:Arial;text-align:center;padding:60px 20px;background:#f9f9ff}
+ button{padding:18px 35px;background:#7c3aed;color:#fff;border:0;border-radius:14px;font-size:20px;cursor:pointer}
+ #status{margin-top:20px;font-weight:bold;color:#333}
 </style>
 </head>
 <body>
@@ -19,7 +19,6 @@
 <script>
 const BACKEND = "https://3c3571f2-1201-4cc2-a296-342c1f12a4e5-00-h5df8mfkdfgt.sisko.replit.dev";
 const statusEl = document.getElementById("status");
-
 document.getElementById("payBtn").onclick = async () => {
   statusEl.innerText = "جاري تسجيل الدخول...";
   try {
@@ -33,34 +32,14 @@ document.getElementById("payBtn").onclick = async () => {
         });
       }
     });
-
     statusEl.innerText = "افتح المحفظة...";
-    await Pi.createPayment({
-      amount: 1,
-      memo: "Test payment",
-      metadata: { test: "1" }
-    }, {
-      onReadyForServerApproval: (paymentId) => {
-        return fetch(BACKEND + "/api/approve", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ paymentId })
-        });
-      },
-      onReadyForServerCompletion: (paymentId, txid) => {
-        return fetch(BACKEND + "/api/complete", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ paymentId, txid })
-        }).then(()=> statusEl.innerText = "✅ تم الدفع بنجاح!");
-      },
+    await Pi.createPayment({ amount: 1, memo: "Test payment", metadata: { test: "1" } }, {
+      onReadyForServerApproval: (paymentId) => fetch(BACKEND + "/api/approve", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ paymentId }) }),
+      onReadyForServerCompletion: (paymentId, txid) => fetch(BACKEND + "/api/complete", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({ paymentId, txid }) }).then(()=> statusEl.innerText = "✅ تم الدفع بنجاح!"),
       onCancel: () => { statusEl.innerText = "ألغيت العملية"; },
       onError: (err) => { statusEl.innerText = "Error: " + err; }
     });
-
-  } catch(e) {
-    statusEl.innerText = "خطأ: " + e.message;
-  }
+  } catch(e) { statusEl.innerText = "خطأ: " + e.message; }
 };
 </script>
 </body>
