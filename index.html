@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pi Payment</title>
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-<script>
-  Pi.init({version:"2.0", sandbox:false});
-</script>
+<script> Pi.init({version:"2.0", sandbox:false}); </script>
 <style>
  body{font-family:Arial;text-align:center;padding:60px 20px}
  button{padding:18px 35px;background:#7c3aed;color:#fff;border:0;border-radius:14px;font-size:20px}
@@ -18,7 +16,6 @@
 <h1>Pi Payment Express</h1>
 <button id="payBtn">Pay 1 Pi Test</button>
 <div id="status">جاهز</div>
-
 <script>
 const BACKEND = "https://3c3571f2-1201-4cc2-a296-342c1f12a4e5-00-h5df8mfkdfgt.sisko.replit.dev";
 const statusEl = document.getElementById("status");
@@ -26,10 +23,9 @@ const statusEl = document.getElementById("status");
 document.getElementById("payBtn").onclick = async () => {
   statusEl.innerText = "جاري تسجيل الدخول...";
   try {
-    // هذا اهم سطر بيصلح الـ Pending
     const auth = await Pi.authenticate(["payments","username"], {
       onIncompletePaymentFound: (payment) => {
-        statusEl.innerText = "لقينا دفعة معلقة، بنصلحها...";
+        statusEl.innerText = "لقينا دفعة معلقة... بنصلحها";
         return fetch(BACKEND + "/api/complete", {
           method: "POST",
           headers: {"Content-Type":"application/json"},
@@ -38,8 +34,7 @@ document.getElementById("payBtn").onclick = async () => {
       }
     });
 
-    statusEl.innerText = "تم الدخول، جاري الدفع...";
-    
+    statusEl.innerText = "افتح المحفظة...";
     await Pi.createPayment({
       amount: 1,
       memo: "Test payment",
@@ -59,8 +54,8 @@ document.getElementById("payBtn").onclick = async () => {
           body: JSON.stringify({ paymentId, txid })
         }).then(()=> statusEl.innerText = "✅ تم الدفع بنجاح!");
       },
-      onCancel: () => statusEl.innerText = "ألغيت العملية",
-      onError: (err) => statusEl.innerText = "Error: " + err
+      onCancel: () => { statusEl.innerText = "ألغيت العملية"; },
+      onError: (err) => { statusEl.innerText = "Error: " + err; }
     });
 
   } catch(e) {
