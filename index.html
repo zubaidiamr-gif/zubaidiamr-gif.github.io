@@ -1,69 +1,35 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pi Payment</title>
-<script src="https://sdk.minepi.com/pi-sdk.js"></script>
-<script> Pi.init({version:"2.0", sandbox:false}); </script>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mr Visiter - نظام الزوار</title>
 <style>
- body{font-family:Arial;text-align:center;padding:60px 20px;background:#f9f9ff}
- button{padding:18px 35px;background:#7c3aed;color:#fff;border:0;border-radius:14px;font-size:20px;cursor:pointer}
- #status{margin-top:20px;font-weight:bold}
+body{font-family:system-ui;background:#f6f7fb;margin:0;padding:0}
+header{background:#111;color:#fff;padding:20px;text-align:center}
+.container{max-width:900px;margin:30px auto;background:#fff;padding:25px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+input,button{padding:12px;border-radius:10px;border:1px solid #ddd;width:100%;margin:8px 0;font-size:16px}
+button{background:#111;color:#fff;cursor:pointer}
+.btn-pi{background:#6a1b9a;color:#fff;display:block;text-align:center;text-decoration:none;padding:14px;border-radius:12px;margin-top:15px;font-weight:bold}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{padding:10px;border-bottom:1px solid #eee;text-align:right}
 </style>
 </head>
 <body>
-<h1>Pi Payment Express</h1>
-<button id="payBtn">Pay 1 Pi Test</button>
-<div id="status">جاهز</div>
+<header><h1>Mr Visiter 👁️</h1><p>نظام تسجيل الزوار</p></header>
+<div class="container">
+<h3>تسجيل زائر جديد</h3>
+<input id="name" placeholder="اسم الزائر">
+<input id="reason" placeholder="سبب الزيارة">
+<button onclick="addVisitor()">إضافة</button>
+<a class="btn-pi" href="/pay/">💜 ادفع 1 Pi لتأكيد الزيارة</a>
+<table><thead><tr><th>الاسم</th><th>السبب</th><th>الوقت</th></tr></thead><tbody id="list"></tbody></table>
+</div>
 <script>
-const BACKEND = "https://3c3571f2-1201-4cc2-a296-342c1f12a4e5-00-h5df8mfkdfgt.sisko.replit.dev";
-const statusEl = document.getElementById("status");
-
-function onIncompletePaymentFound(payment) {
-  statusEl.innerText = "نصلح دفعة قديمة...";
-  return fetch(BACKEND + "/api/complete", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction ? payment.transaction.txid : "" })
-  });
-}
-
-document.getElementById("payBtn").onclick = async function() {
-  statusEl.innerText = "جاري تسجيل الدخول...";
-  try {
-    await Pi.authenticate(["username","payments"], onIncompletePaymentFound);
-    statusEl.innerText = "افتح المحفظة...";
-    Pi.createPayment({
-      amount: 1,
-      memo: "Test payment",
-      metadata: {test: "1"}
-    }, {
-      onReadyForServerApproval: function(paymentId) {
-        return fetch(BACKEND + "/api/approve", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ paymentId: paymentId })
-        });
-      },
-      onReadyForServerCompletion: function(paymentId, txid) {
-        return fetch(BACKEND + "/api/complete", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ paymentId: paymentId, txid: txid })
-        }).then(function(){ statusEl.innerText = "✅ تم الدفع بنجاح!"; });
-      },
-      onCancel: function(paymentId) {
-        statusEl.innerText = "ألغيت العملية";
-      },
-      onError: function(error, payment) {
-        statusEl.innerText = "Error: " + error;
-      }
-    });
-  } catch(e) {
-    statusEl.innerText = "خطأ: " + e.message;
-  }
-};
+let visitors=JSON.parse(localStorage.getItem('vis')||'[]');
+function render(){document.getElementById('list').innerHTML=visitors.map(v=>`<tr><td>${v.name}</td><td>${v.reason}</td><td>${v.time}</td></tr>`).join('')}
+function addVisitor(){let n=document.getElementById('name').value,r=document.getElementById('reason').value;if(!n)return;visitors.unshift({name:n,reason:r,time:new Date().toLocaleString('ar')});localStorage.setItem('vis',JSON.stringify(visitors));render();document.getElementById('name').value='';document.getElementById('reason').value=''}
+render();
 </script>
 </body>
 </html>
