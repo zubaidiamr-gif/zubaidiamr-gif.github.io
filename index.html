@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pi Payment</title>
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
-<script>Pi.init({version:"2.0", sandbox:false});</script>
+<script> Pi.init({version:"2.0", sandbox:false}); </script>
 <style>
-body{font-family:Arial;text-align:center;padding:60px 20px;background:#f9f9f9}
-button{padding:18px 35px;background:#7c3aed;color:#fff;border:0;border-radius:8px;font-size:16px;cursor:pointer}
-#status{margin-top:20px;font-weight:bold}
+ body{font-family:Arial;text-align:center;padding:60px 20px;background:#f9f9ff}
+ button{padding:18px 35px;background:#7c3aed;color:#fff;border:0;border-radius:14px;font-size:20px;cursor:pointer}
+ #status{margin-top:20px;font-weight:bold}
 </style>
 </head>
 <body>
@@ -20,35 +20,49 @@ button{padding:18px 35px;background:#7c3aed;color:#fff;border:0;border-radius:8p
 const BACKEND = "https://3c3571f2-1201-4cc2-a296-342c1f12a4e5-00-h5df8mfkdfgt.sisko.replit.dev";
 const statusEl = document.getElementById("status");
 
-function onIncompletePaymentFound(payment){
-    statusEl.innerText = "... لقينا دفعة معلقة.. بنصلحها";
-    return fetch(BACKEND + "/api/complete", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid })
-    });
+function onIncompletePaymentFound(payment) {
+  statusEl.innerText = "نصلح دفعة قديمة...";
+  return fetch(BACKEND + "/api/complete", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction ? payment.transaction.txid : "" })
+  });
 }
 
-document.getElementById("payBtn").onclick = async () => {
-    statusEl.innerText = "... جاري تسجيل الدخول";
-    try {
-        await Pi.authenticate(["username","payments"], onIncompletePaymentFound);
-        statusEl.innerText = "... افتح المحفظة";
-        await Pi.createPayment({ amount: 1, memo: "Test payment", metadata: {internalId: "123"},
-            onReadyForServerApproval: (paymentId) => fetch(BACKEND + "/api/approve", {
-                method: "POST",
-                headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({ paymentId: paymentId })
-            }),
-            onReadyForServerCompletion: (paymentId, txid) => fetch(BACKEND + "/api/complete", {
-                method: "POST",
-                headers: {"Content-Type":"application/json"},
-                body: JSON.stringify({ paymentId: paymentId, txid: txid })
-            }),
-            onCancel: () => { statusEl.innerText = "ألغيت العملية"; },
-            onError: (err) => { statusEl.innerText = "Error: " + err; }
+document.getElementById("payBtn").onclick = async function() {
+  statusEl.innerText = "جاري تسجيل الدخول...";
+  try {
+    await Pi.authenticate(["username","payments"], onIncompletePaymentFound);
+    statusEl.innerText = "افتح المحفظة...";
+    Pi.createPayment({
+      amount: 1,
+      memo: "Test payment",
+      metadata: {test: "1"}
+    }, {
+      onReadyForServerApproval: function(paymentId) {
+        return fetch(BACKEND + "/api/approve", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ paymentId: paymentId })
         });
-    } catch(e){ statusEl.innerText = "خطأ: " + e.message; }
+      },
+      onReadyForServerCompletion: function(paymentId, txid) {
+        return fetch(BACKEND + "/api/complete", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ paymentId: paymentId, txid: txid })
+        }).then(function(){ statusEl.innerText = "✅ تم الدفع بنجاح!"; });
+      },
+      onCancel: function(paymentId) {
+        statusEl.innerText = "ألغيت العملية";
+      },
+      onError: function(error, payment) {
+        statusEl.innerText = "Error: " + error;
+      }
+    });
+  } catch(e) {
+    statusEl.innerText = "خطأ: " + e.message;
+  }
 };
 </script>
 </body>
